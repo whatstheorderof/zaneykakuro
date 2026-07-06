@@ -1,3 +1,4 @@
+import { inject } from "@vercel/analytics";
 import {
   candidatesForCell,
   combinationsFor,
@@ -6,6 +7,9 @@ import {
   getRunForCell,
   modes
 } from "./puzzleEngine.js";
+
+// Initialize Vercel Analytics
+inject();
 
 const app = document.querySelector("#root");
 const modeNames = modes().map((mode) => mode.label);

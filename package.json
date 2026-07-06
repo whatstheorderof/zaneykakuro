@@ -9,5 +9,8 @@
     "library:export": "node scripts/export-library.mjs",
     "preview": "python3 -m http.server 4173 -d dist",
     "test": "node scripts/validate-library.mjs"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   }
 }

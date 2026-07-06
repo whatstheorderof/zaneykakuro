@@ -16,7 +16,9 @@ const state = {
   puzzle: generatePuzzle("Classic", today),
   selected: null,
   values: {},
-  notesOn: true,
+  manualNotes: {},
+  noteMode: false,
+  notesOn: false,
   mistakes: 0,
   hints: 0,
   elapsed: 0,
@@ -82,10 +84,13 @@ function resetPuzzle(mode) {
   state.puzzle = generatePuzzle(mode, today);
   state.selected = getPlayableCells(state.puzzle)[0];
   state.values = {};
+  state.manualNotes = {};
+  state.noteMode = false;
   state.mistakes = 0;
   state.hints = 0;
   state.elapsed = 0;
   state.completed = false;
+  state.notesOn = false;
   state.explainOn = true;
   state.toast = "";
   state.wrongKeys = new Set();
@@ -97,9 +102,35 @@ function inputValue(value) {
   if (!selected || !state.puzzle.layout[selected.row][selected.col]) return;
   const selectedKey = keyFor(selected);
   state.wrongKeys.delete(selectedKey);
+
+  if (state.noteMode) {
+    if (value == null) {
+      delete state.manualNotes[selectedKey];
+    } else if (state.values[selectedKey]) {
+      showToast("Clear the square before adding notes.");
+      return;
+    } else {
+      toggleManualNote(selectedKey, value);
+    }
+    renderBoardAndPanels();
+    return;
+  }
+
   if (value == null) delete state.values[selectedKey];
-  else state.values[selectedKey] = value;
+  else {
+    state.values[selectedKey] = value;
+    delete state.manualNotes[selectedKey];
+  }
   renderBoardAndPanels();
+}
+
+function toggleManualNote(cellKey, digit) {
+  const notes = new Set(state.manualNotes[cellKey] ?? []);
+  if (notes.has(digit)) notes.delete(digit);
+  else notes.add(digit);
+
+  if (notes.size) state.manualNotes[cellKey] = [...notes].sort((a, b) => a - b);
+  else delete state.manualNotes[cellKey];
 }
 
 function moveSelection(key) {
@@ -256,7 +287,7 @@ function render() {
             <section class="action-grid" aria-label="Puzzle actions">
               <button type="button" data-hint>${icon("hint")} Hint</button>
               <button type="button" data-check>${icon("check")} Check</button>
-              <button type="button" data-notes-toggle>${icon("notes")} Notes</button>
+              <button class="${state.noteMode ? "is-active" : ""}" type="button" aria-pressed="${state.noteMode}" data-note-mode-toggle>${icon("notes")} Notes</button>
               <button type="button" data-share>${icon("share")} Share</button>
             </section>
           </aside>
@@ -287,9 +318,9 @@ function render() {
   app.querySelector("[data-check]").addEventListener("click", checkPuzzle);
   app.querySelector("[data-hint]").addEventListener("click", explainHint);
   app.querySelector("[data-share]").addEventListener("click", shareProgress);
-  app.querySelector("[data-notes-toggle]").addEventListener("click", () => {
-    state.notesOn = !state.notesOn;
-    renderBoardAndPanels();
+  app.querySelector("[data-note-mode-toggle]").addEventListener("click", () => {
+    state.noteMode = !state.noteMode;
+    updateNoteModeControls();
   });
 
   renderBoardAndPanels();
@@ -299,7 +330,16 @@ function renderBoardAndPanels() {
   renderBoard();
   renderExplain();
   renderSmartNotes();
+  updateNoteModeControls();
   updateTimerAndStats();
+}
+
+function updateNoteModeControls() {
+  app.querySelector(".number-pad")?.classList.toggle("is-note-mode", state.noteMode);
+  const noteButton = app.querySelector("[data-note-mode-toggle]");
+  if (!noteButton) return;
+  noteButton.classList.toggle("is-active", state.noteMode);
+  noteButton.setAttribute("aria-pressed", String(state.noteMode));
 }
 
 function renderBoard() {
@@ -326,7 +366,9 @@ function renderBoard() {
               const value = state.values[cellKey];
               const isSelected = state.selected?.row === rowIndex && state.selected?.col === colIndex;
               const isWrong = state.wrongKeys.has(cellKey);
-              const candidates = state.notesOn ? candidatesForCell(state.puzzle, state.values, cell) : [];
+              const manual = state.manualNotes[cellKey] ?? [];
+              const candidates = manual.length ? manual : state.notesOn ? candidatesForCell(state.puzzle, state.values, cell) : [];
+              const noteClass = manual.length ? "notes is-manual" : "notes";
               return `
                 <button class="cell play-cell ${isSelected ? "is-selected" : ""} ${selectedRunKeys.has(cellKey) ? "in-run" : ""} ${
                   isWrong ? "is-wrong" : ""
@@ -335,7 +377,7 @@ function renderBoard() {
                   ${
                     value
                       ? `<span class="entry">${value}</span>`
-                      : `<span class="notes">${candidates.map((digit) => `<span>${digit}</span>`).join("")}</span>`
+                      : `<span class="${noteClass}">${candidates.map((digit) => `<span>${digit}</span>`).join("")}</span>`
                   }
                 </button>`;
             })
@@ -495,14 +537,14 @@ function renderSmartNotes() {
       <p>Smart Notes</p>
       <span data-notes-state>${state.notesOn ? "On" : "Off"}</span>
     </div>
-    <p class="muted">Possible values and eliminated numbers update as the run changes.</p>
+    <p class="muted">Possible values update here. Use Notes mode to add your own pencil marks.</p>
     <div class="digit-row" aria-label="Possible values">
       ${[1, 2, 3, 4, 5, 6, 7, 8, 9]
         .map((digit) => `<span class="${candidates.includes(digit) ? "is-possible" : ""}">${digit}</span>`)
         .join("")}
     </div>
     <p class="eliminated-line">${eliminated.length ? `Eliminated: ${eliminated.join(", ")}` : "No eliminations yet."}</p>
-    <button class="toggle ${state.notesOn ? "is-on" : ""}" type="button" data-notes-toggle-inline>
+    <button class="toggle ${state.notesOn ? "is-on" : ""}" type="button" aria-pressed="${state.notesOn}" data-notes-toggle-inline>
       <span></span>
       Automatic notes
     </button>

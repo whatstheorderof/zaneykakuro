@@ -269,6 +269,21 @@ svg {
   text-align: center;
 }
 
+.notes.is-manual {
+  color: var(--ink);
+}
+
+.notes.is-manual span {
+  display: grid;
+  width: 1.45em;
+  height: 1.45em;
+  place-items: center;
+  justify-self: center;
+  border: 1px solid rgba(32, 26, 22, 0.36);
+  border-radius: 5px;
+  background: var(--teal-soft);
+}
+
 .clue-cell {
   background: #2a211a;
   color: #fff5df;
@@ -317,6 +332,15 @@ svg {
   color: var(--ink);
   font-weight: 850;
   box-shadow: 2px 2px 0 rgba(32, 26, 22, 0.2);
+}
+
+.number-pad.is-note-mode button[data-number],
+.action-grid button.is-active {
+  background: var(--teal-soft);
+}
+
+.action-grid button.is-active {
+  box-shadow: 3px 3px 0 var(--grid);
 }
 
 .clear-button {

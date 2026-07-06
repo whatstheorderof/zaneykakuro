@@ -189,7 +189,7 @@ svg {
 .play-layout {
   display: grid;
   grid-template-columns: minmax(420px, 680px) 360px;
-  gap: 22px;
+  gap: 16px;
   align-items: start;
 }
 
@@ -205,7 +205,7 @@ svg {
   width: min(100%, 680px);
   border: 3px solid var(--grid);
   background: var(--grid);
-  box-shadow: 8px 8px 0 rgba(32, 26, 22, 0.18);
+  box-shadow: 5px 5px 0 rgba(32, 26, 22, 0.14);
 }
 
 .cell {
@@ -339,7 +339,7 @@ svg {
 
 .panel-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
@@ -348,6 +348,72 @@ svg {
 .panel-heading p {
   margin: 0;
   font-weight: 900;
+}
+
+.panel-heading div {
+  display: grid;
+  gap: 4px;
+}
+
+.switch-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.8);
+  color: var(--muted);
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.switch-button span {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+  border: 2px solid var(--grid);
+  border-radius: 999px;
+  background: var(--paper-deep);
+}
+
+.switch-button span::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--grid);
+  transition: transform 160ms ease;
+}
+
+.switch-button.is-on {
+  color: var(--ink);
+}
+
+.switch-button.is-on span {
+  background: var(--teal-soft);
+}
+
+.switch-button.is-on span::after {
+  transform: translateX(13px);
+}
+
+.explain-panel--collapsed {
+  padding-block: 14px;
+}
+
+.explain-panel--collapsed .panel-heading {
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.explain-panel--collapsed p {
+  margin: 0;
 }
 
 .panel h2 {
@@ -710,7 +776,8 @@ svg {
 
   .number-pad button,
   .action-grid button,
-  .text-action {
+  .text-action,
+  .switch-button {
     min-height: 46px;
   }
 
@@ -731,6 +798,10 @@ svg {
 
   .panel {
     padding: 14px;
+  }
+
+  .panel-heading {
+    align-items: center;
   }
 
   .panel h2 {

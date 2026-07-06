@@ -21,6 +21,7 @@ const state = {
   hints: 0,
   elapsed: 0,
   completed: false,
+  explainOn: true,
   toast: "",
   wrongKeys: new Set(),
   stats: loadStats()
@@ -85,6 +86,7 @@ function resetPuzzle(mode) {
   state.hints = 0;
   state.elapsed = 0;
   state.completed = false;
+  state.explainOn = true;
   state.toast = "";
   state.wrongKeys = new Set();
   render();
@@ -386,14 +388,45 @@ function renderExplain() {
   const root = app.querySelector("[data-explain]");
   const run = getBestRun();
 
+  if (!state.explainOn) {
+    root.innerHTML = `
+      <section class="panel explain-panel explain-panel--collapsed">
+        <div class="panel-heading">
+          <p>Explain Mode</p>
+          <button class="switch-button" type="button" aria-pressed="false" data-explain-toggle-inline>
+            <span></span>
+            Off
+          </button>
+        </div>
+        <p class="muted">Hidden for a quieter solve. Smart Notes and hints still work.</p>
+      </section>
+    `;
+
+    root.querySelector("[data-explain-toggle-inline]").addEventListener("click", () => {
+      state.explainOn = true;
+      renderBoardAndPanels();
+    });
+    return;
+  }
+
   if (!state.selected || !run) {
     root.innerHTML = `
       <section class="panel explain-panel">
-        <div class="panel-heading"><p>Explain Mode</p><span>Teaching, not answers</span></div>
+        <div class="panel-heading">
+          <p>Explain Mode</p>
+          <button class="switch-button is-on" type="button" aria-pressed="true" data-explain-toggle-inline>
+            <span></span>
+            On
+          </button>
+        </div>
         <h2>Select a square to start reasoning.</h2>
         <p class="muted">Zaney will point at the relevant run, show what is already placed, and narrow the possible digits.</p>
       </section>
     `;
+    root.querySelector("[data-explain-toggle-inline]").addEventListener("click", () => {
+      state.explainOn = false;
+      renderBoardAndPanels();
+    });
     return;
   }
 
@@ -403,7 +436,16 @@ function renderExplain() {
 
   root.innerHTML = `
     <section class="panel explain-panel">
-      <div class="panel-heading"><p>Explain Mode</p><span>${run.direction} run</span></div>
+      <div class="panel-heading">
+        <div>
+          <p>Explain Mode</p>
+          <span>${run.direction} run</span>
+        </div>
+        <button class="switch-button is-on" type="button" aria-pressed="true" data-explain-toggle-inline>
+          <span></span>
+          On
+        </button>
+      </div>
       <h2>This run must total ${run.clue}.</h2>
       <p>${detail.placed.length ? `You've already placed ${detail.placed.join(" and ")}.` : "No digits are locked into this run yet."}</p>
       <div class="run-meter" aria-label="Run progress">
@@ -435,6 +477,10 @@ function renderExplain() {
     </section>
   `;
 
+  root.querySelector("[data-explain-toggle-inline]").addEventListener("click", () => {
+    state.explainOn = false;
+    renderBoardAndPanels();
+  });
   root.querySelector("[data-hint-inline]").addEventListener("click", explainHint);
 }
 

@@ -1,0 +1,17 @@
+{
+  "name": "Zaney Kakuro",
+  "short_name": "Zaney",
+  "description": "Crossword meets arithmetic.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f0e3",
+  "theme_color": "#d95b47",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

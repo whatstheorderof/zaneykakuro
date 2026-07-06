@@ -1,0 +1,13 @@
+{
+  "name": "zaney-kakuro",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python3 -m http.server 5173",
+    "build": "node scripts/build-static.mjs",
+    "library:export": "node scripts/export-library.mjs",
+    "preview": "python3 -m http.server 4173 -d dist",
+    "test": "node scripts/validate-library.mjs"
+  }
+}
